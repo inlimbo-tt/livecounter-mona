@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Live counter</title><style>
+*{box-sizing:border-box}body{margin:0;background:#101010;color:white;font-family:system-ui;display:grid;place-items:center;min-height:100dvh}#number{font-size:min(65vw,70vh);font-weight:800;line-height:1;font-variant-numeric:tabular-nums}footer{position:fixed;bottom:1rem;display:flex;gap:1rem;align-items:center;color:#aaa;font-size:14px}button{font:inherit;padding:.8rem 1rem;border-radius:12px;cursor:pointer} .flash{animation:flash .45s}@keyframes flash{50%{color:#ffd54a}}
+</style></head><body><main id="number" aria-live="polite">–</main><footer><button id="sound">Enable sound</button><span id="status">Connecting…</span></footer><script type="module">
+import {counter,connected,onValue} from './firebase.js';
+const number=document.querySelector('#number'), sound=document.querySelector('#sound'), status=document.querySelector('#status');
+let audio, previous=null;
+function ding(){if(!audio||audio.state!=='running')return;const t=audio.currentTime;for(const [f,volume] of [[880,.65],[1320,.25]]){const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=f;g.gain.setValueAtTime(volume,t);g.gain.exponentialRampToValueAtTime(.001,t+.65);o.connect(g).connect(audio.destination);o.start(t);o.stop(t+.7);}}
+sound.onclick=async()=>{try{audio??=new (window.AudioContext||window.webkitAudioContext)();await audio.resume();ding();sound.textContent='Sound enabled · test';}catch(e){status.textContent=e.message;}};
+onValue(connected,s=>status.textContent=s.val()?'Live':'Offline · reconnecting…');
+onValue(counter,s=>{const n=s.val();if(!Number.isInteger(n)||n<1||n>99)return;number.textContent=n;if(previous!==null&&previous!==n){ding();number.classList.remove('flash');void number.offsetWidth;number.classList.add('flash');}previous=n;},e=>status.textContent=e.message);
+</script></body></html>
