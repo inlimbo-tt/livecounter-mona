@@ -5,7 +5,31 @@ import {db,counter,connected,onValue} from './firebase.js';
 import {ref} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 const number=document.querySelector('#number'), sound=document.querySelector('#sound'), status=document.querySelector('#status');
 let audio, previous=null;
-function ding(){if(!audio||audio.state!=='running')return;const t=audio.currentTime;for(const [f,volume] of [[880,.65],[1320,.25]]){const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=f;g.gain.setValueAtTime(volume,t);g.gain.exponentialRampToValueAtTime(.001,t+.65);o.connect(g).connect(audio.destination);o.start(t);o.stop(t+.7);}}
+function ding() {
+    if (!audio || audio.state !== 'running') return;
+    const start = audio.currentTime + 0.015;
+    const notes = [466.16, 392.00, 293.66];
+    const master = audio.createGain();
+    master.gain.value = 0.8;
+    master.connect(audio.destination);
+    notes.forEach((frequency, i) => {
+        const t = start + i * 0.25;
+        const duration = i === 2 ? 1.5 : 0.32;
+        for (const [ratio, volume] of [[1, 0.65], [2, 0.12], [3, 0.04]]) {
+            const oscillator = audio.createOscillator();
+            const envelope = audio.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency * ratio;
+            envelope.gain.setValueAtTime(0.001, t);
+            envelope.gain.exponentialRampToValueAtTime(volume, t + 0.012);
+            envelope.gain.exponentialRampToValueAtTime(0.001, t + duration);
+            oscillator.connect(envelope).connect(master);
+            oscillator.start(t);
+            oscillator.stop(t + duration + 0.02);
+            if (i === 2 && ratio === 1) oscillator.onended = () => master.disconnect();
+        }
+    });
+}
 sound.onclick=async()=>{try{audio??=new (window.AudioContext||window.webkitAudioContext)();await audio.resume();ding();sound.textContent='🔔 Son activé';}catch(e){status.textContent=e.message;}};
 onValue(connected,s=>status.textContent=s.val()?'':'Hors ligne · reconnexion…');
 onValue(counter,s=>{const n=s.val();if(!Number.isInteger(n)||n<1||n>100)return;number.textContent=String(n).padStart(3,'0');if(previous!==null&&previous!==n){ding();number.classList.remove('flash');void number.offsetWidth;number.classList.add('flash');}previous=n;},e=>status.textContent=e.message);
