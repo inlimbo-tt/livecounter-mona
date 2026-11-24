@@ -15,7 +15,7 @@ function ding() {
     master.connect(audio.destination);
     notes.forEach((frequency, i) => {
         const t = start + i * 0.25;
-        const duration = i === 2 ? 1.5 : 0.32;
+        const duration = i === 2 ? 4.5 : 0.96;
         for (const [ratio, volume] of [[1, 0.65], [2, 0.12], [3, 0.04]]) {
             const oscillator = audio.createOscillator();
             const envelope = audio.createGain();
