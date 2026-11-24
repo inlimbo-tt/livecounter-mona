@@ -5,7 +5,7 @@
     "counter": {
       ".read": true,
       ".write": "auth != null && auth.uid === 'YOUR_ADMIN_UID' && newData.exists()",
-      ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 99 && newData.val() % 1 === 0"
+      ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100 && newData.val() % 1 === 0"
     }
   }
 }

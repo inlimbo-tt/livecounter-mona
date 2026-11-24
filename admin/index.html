@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Counter admin</title><style>
 *{box-sizing:border-box}body{font:16px system-ui;background:#f3f3f3;color:#111;margin:0;padding:24px}main{max-width:420px;margin:5vh auto;background:white;padding:28px;border-radius:20px}input,button{font:inherit;padding:14px;border:1px solid #ccc;border-radius:10px;width:100%;margin:5px 0}button{background:#111;color:white;cursor:pointer}button:disabled{opacity:.4}#number{font-size:100px;text-align:center;font-weight:800}#status,#error{overflow-wrap:anywhere}#error{color:#b22} [hidden]{display:none!important}
-</style></head><body><main><h1>Counter admin</h1><form id="login"><label>Email<input id="email" type="email" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button>Sign in</button></form><section id="panel" hidden><div id="number">–</div><button id="next" disabled>Next number (+1) · Space</button><form id="manual"><label>Set number<input id="value" type="number" min="1" max="99" step="1" required></label><button id="save" disabled>Set number</button></form><button id="logout">Sign out</button></section><p id="status">Connecting…</p><p id="error" role="alert"></p><a href="../">Public display</a></main><script type="module">
+</style></head><body><main><h1>Counter admin</h1><form id="login"><label>Email<input id="email" type="email" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button>Sign in</button></form><section id="panel" hidden><div id="number">–</div><button id="next" disabled>Next number (+1) · Space</button><form id="manual"><label>Set number<input id="value" type="number" min="1" max="100" step="1" required></label><button id="save" disabled>Set number</button></form><button id="logout">Sign out</button></section><p id="status">Connecting…</p><p id="error" role="alert"></p><a href="../">Public display</a></main><script type="module">
 import {auth,counter,connected,onValue,set,runTransaction,signInWithEmailAndPassword,onAuthStateChanged,signOut} from '../firebase.js';
 const $=id=>document.getElementById(id);let online=false,busy=false,user=null;
 function controls(){ $('next').disabled=$('save').disabled=!online||busy||!user; }
@@ -11,8 +11,8 @@ onAuthStateChanged(auth,u=>{user=u;$('login').hidden=!!u;$('panel').hidden=!u;co
 $('login').onsubmit=async e=>{e.preventDefault();$('error').textContent='';try{await signInWithEmailAndPassword(auth,$('email').value,$('password').value);$('password').value='';}catch(e){error(e);}};
 $('logout').onclick=()=>signOut(auth).catch(error);
 async function write(fn){if(!online||busy||!user)return;busy=true;controls();$('error').textContent='';try{await fn();}catch(e){error(e);}finally{busy=false;controls();}}
-function next(){return write(()=>runTransaction(counter,n=>Number.isInteger(n)&&n>=1&&n<99?n+1:1));}
+function next(){return write(()=>runTransaction(counter,n=>Number.isInteger(n)&&n>=1&&n<100?n+1:1));}
 $('next').onclick=next;
-$('manual').onsubmit=e=>{e.preventDefault();const n=Number($('value').value);if(Number.isInteger(n)&&n>=1&&n<=99)write(()=>set(counter,n));};
+$('manual').onsubmit=e=>{e.preventDefault();const n=Number($('value').value);if(Number.isInteger(n)&&n>=1&&n<=100)write(()=>set(counter,n));};
 window.addEventListener('keydown',e=>{if(e.code!=='Space'||!user||e.target.closest('input,textarea,select,[contenteditable]'))return;e.preventDefault();if(!e.repeat)next();});
 </script></body></html>
